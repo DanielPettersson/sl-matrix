@@ -9,10 +9,15 @@ import Image
 import ImageDraw
 import ImageFont
 import time
+import line
 from rgbmatrix import Adafruit_RGBmatrix
 
+def drawText(text, xd, y, color, font):
+	width, ignore = font.getsize(text)
+	draw.text((16+xd-width/2, y), text, fill=color, font=font)
+
 matrix = Adafruit_RGBmatrix(32, 1)
-image = Image.new("RGB", (32, 32), "black")
+image = Image.new("RGBA", (32, 32), "black")
 draw  = ImageDraw.Draw(image)
 fontBig = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeSans.ttf', 16)
 fontSmall = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeSans.ttf', 11)
@@ -32,21 +37,37 @@ while time.time() - start_time < 5400:
 
 		if bus is None:
 			print 'No next bus'
-			width, ignore = fontSmall.getsize('Ingen')
-			draw.text((16-width/2, 8), 'Ingen', fill=(255,255,0), font=fontSmall)
+			drawText('Ingen', 0, 8, (255,255,0), fontSmall)
 		else:
 			print bus['LineNumber'] + ' ' + bus['DisplayTime'] 
-			width, ignore = fontBig.getsize(bus['LineNumber'])
-			draw.text((16-width/2, 0), bus['LineNumber'], fill=(255,0,0), font=fontBig)
-			width, ignore = fontSmall.getsize(bus['DisplayTime'])
-			draw.text((16-width/2, 16), bus['DisplayTime'], fill=(0,255,0), font=fontSmall)
+			drawText(bus['LineNumber'], -1, 0, (0,200,0), fontBig)
+			drawText(bus['DisplayTime'], 0, 17, (255,0,0), fontSmall)
 
 		matrix.Clear()
 		matrix.SetImage(image.im.id, 0, 0)
-		time.sleep(30)
+
+		wait_time = 60
+		if bus is None:
+			wait_time = 120
+		elif bus['DisplayTime'] == '4 min' or bus['DisplayTime'] == '3 min'or bus['DisplayTime'] == '2 min':
+			wait_time = 30
+		elif bus['DisplayTime'] == 'Nu' or bus['DisplayTime'] == '1 min':
+			wait_time = 15
+
+		wait_start_time = time.time()
+		waited_time = 0.01
+		while waited_time < wait_time:
+			xx = waited_time/wait_time * 32
+			line.drawLine(draw, image, xx-2, 31, xx, 31, (210,210,210,20))
+			matrix.SetImage(image.im.id, 0, 0)
+			time.sleep(0.25)
+			waited_time = time.time() - wait_start_time
+
+
 	except ValueError:
 		print ' Failed to get data from SL'
 		time.sleep(15)
+
 	
 	
 
