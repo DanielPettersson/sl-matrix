@@ -58,13 +58,14 @@ while time.time() - start_time < 5400:
 		waited_time = 0.01
 		while waited_time < wait_time:
 			xx = waited_time/wait_time * 32
+			line.drawLine(draw, image, xx-2, 30, xx, 30, (210,210,210,20))
 			line.drawLine(draw, image, xx-2, 31, xx, 31, (210,210,210,20))
 			matrix.SetImage(image.im.id, 0, 0)
 			time.sleep(0.25)
 			waited_time = time.time() - wait_start_time
 
 
-	except ValueError:
+	except Exception:
 		print ' Failed to get data from SL'
 		time.sleep(15)
 
