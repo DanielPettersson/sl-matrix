@@ -6,8 +6,8 @@ import json
 class SlData:
 
 	host = 'api.sl.se'
-	stationUrl = '/api2/typeahead.json?key=<API-KEY>&searchstring='
-	realtimeUrl = '/api2/realtimedeparturesV4.json?key=<API-KEY>&TimeWindow=60&siteid='
+	stationUrl = '/api2/typeahead.json?key=8b5fddea149b4d53b8e3890380fb2bc4&searchstring='
+	realtimeUrl = '/api2/realtimedeparturesV4.json?key=02778be263584b489adc460921233129&TimeWindow=60&siteid='
 
 	@staticmethod
 	def findStation(stationSearch):

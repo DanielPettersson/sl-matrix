@@ -6,8 +6,8 @@ import json
 
 class Spotify:
 
-	basicAuth='<base 64 encoding of clientId:clientSecret>'
-	refreshToken='<refresh token of authenticated user>'
+	basicAuth='YjM0N2UxYThlMmZmNGU5NDgzY2MyN2E3Y2Y0Mzc0ODY6Zjk4MjEyZGNjM2Y2NGQ5MjllMmQ2OWExNGM4NmEzMDE='
+	refreshToken='AQD9FAmCU-iN_5ICrYtr5UsW5ZHaJP_pkzPwNTSujwcyl4g4da7eOKnYpbmIgfBzqYl6Zl5qwaz0LSwiKPi2Likb_Y7EYLAI-7gCWvpHxUXcGbqXPXDVlVD_WlTkNByiK_w'
 
 	@staticmethod
 	def currentlyPlaying(accessToken):

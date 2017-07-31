@@ -85,42 +85,49 @@ while time.time() - start_time < 50400:
 
 	try :
 		currentlyPlaying = Spotify.currentlyPlaying(accessToken)
-		songName = currentlyPlaying['item']['name'].encode('iso-8859-1').strip()
-		artistName = currentlyPlaying['item']['artists'][0]['name'].encode('iso-8859-1').strip()
-		displayText = artistName + ' - ' + songName
-		displayTextWidth = textWidth(displayText, fontSmall)
-		durationMs = currentlyPlaying['item']['duration_ms']
-		progressMs = currentlyPlaying['progress_ms']
-		remainingMs = durationMs - progressMs
-		loadMs = int(round(time.time() * 1000))
-		nowMs = loadMs
-		endMs = nowMs + remainingMs
 		
-		print displayText
+		if currentlyPlaying['is_playing'] == True:
+		
+			songName = currentlyPlaying['item']['name'].encode('iso-8859-1').strip()
+			artistName = currentlyPlaying['item']['artists'][0]['name'].encode('iso-8859-1').strip()
+			displayText = artistName + ' - ' + songName
+			displayTextWidth = textWidth(displayText, fontSmall)
+			durationMs = currentlyPlaying['item']['duration_ms']
+			progressMs = currentlyPlaying['progress_ms']
+			remainingMs = durationMs - progressMs
+			loadMs = int(round(time.time() * 1000))
+			nowMs = loadMs
+			endMs = nowMs + remainingMs
+			
+			print displayText
+					
+			while endMs > nowMs and nowMs - loadMs < 5000:
+			
+				draw.rectangle([(0, 0), image.size], fill = (0,0,0))
+			
+				currentProgressMs = progressMs + (nowMs - loadMs)
+				progress = currentProgressMs / float(durationMs) * 360
+				draw.pieslice([0, 0, 32, 32], 0, int(progress), fill=(60,0,0,255))
+				draw.arc([0, 0, 32, 32], 0, 360, fill=(120,0,0,255))
 				
-		while endMs > nowMs and nowMs - loadMs < 5000:
-		
+				draw.text((displayTextScroll, 8), displayText, fill=(200,200,200), font=fontSmall)
+				matrix.SetImage(image.im.id, 0, 0)
+				displayTextScroll -= 1
+				
+				if displayTextScroll < -displayTextWidth:
+					displayTextScroll = 32
+				nowMs = int(round(time.time() * 1000))
+				time.sleep(0.05)
+			
+		else:
+			
 			draw.rectangle([(0, 0), image.size], fill = (0,0,0))
-		
-			currentProgressMs = progressMs + (nowMs - loadMs)
-			progress = currentProgressMs / float(durationMs) * 360
-			draw.pieslice([0, 0, 32, 32], 0, int(progress), fill=(60,0,0,255))
-			draw.arc([0, 0, 32, 32], 0, 360, fill=(120,0,0,255))
-			
-			draw.text((displayTextScroll, 8), displayText, fill=(200,200,200), font=fontSmall)
 			matrix.SetImage(image.im.id, 0, 0)
-			displayTextScroll -= 1
-			
-			if displayTextScroll < -displayTextWidth:
-				displayTextScroll = 32
-			nowMs = int(round(time.time() * 1000))
-			time.sleep(0.05)
-			
-		
+			time.sleep(20)
 
 	except Exception as e:
 		print e
-		time.sleep(60)
+		time.sleep(20)
 		accessToken = Spotify.getAccessToken()	
 	
 
