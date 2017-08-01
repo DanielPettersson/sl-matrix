@@ -110,7 +110,14 @@ while time.time() - start_time < 50400:
 				draw.pieslice([0, 0, 32, 32], 0, int(progress), fill=(60,0,0,255))
 				draw.arc([0, 0, 32, 32], 0, 360, fill=(120,0,0,255))
 				
-				draw.text((displayTextScroll, 8), displayText, fill=(200,200,200), font=fontSmall)
+				draw.text((displayTextScroll, 3), displayText, fill=(170,170,170,170), font=fontSmall)
+				
+				currentProgressM = currentProgressMs / 60000
+				currentProgressS = (currentProgressMs / 1000) % 60
+				currentProgressStr = "%d:%02d" % (currentProgressM, currentProgressS)
+				
+				drawText(currentProgressStr, 0, 17, (170,170,170,170), fontSmall)
+				
 				matrix.SetImage(image.im.id, 0, 0)
 				displayTextScroll -= 1
 				
@@ -120,6 +127,8 @@ while time.time() - start_time < 50400:
 				time.sleep(0.05)
 			
 		else:
+			
+			print 'not playing'
 			
 			draw.rectangle([(0, 0), image.size], fill = (0,0,0))
 			matrix.SetImage(image.im.id, 0, 0)
