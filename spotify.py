@@ -15,10 +15,13 @@ class Spotify:
 		connection = httplib.HTTPSConnection('api.spotify.com')
 		connection.request('GET', '/v1/me/player/currently-playing', headers={'Authorization': 'Bearer ' + accessToken})
 		response = connection.getresponse()
-		data = json.loads(response.read(), 'utf-8')
+		responseData = response.read()
 		connection.close()
-
-		return data
+		
+		if response.status == 200 and responseData != '':
+			return json.loads(responseData, 'utf-8')
+		else:
+			return {'is_playing': False}
 
 	@staticmethod
 	def getAccessToken():
