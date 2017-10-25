@@ -12,6 +12,8 @@ import ImageDraw
 import ImageFont
 import time
 import line
+import threading
+import logging
 from rgbmatrix import Adafruit_RGBmatrix
 
 def textWidth(text, font):
@@ -75,69 +77,84 @@ while time.time() - start_time < 5400:
 		print ' Failed to get data from SL'
 		time.sleep(15)
 
+print 'Start checking for Spotify'		
 		
-		
-accessToken = Spotify.getAccessToken()
-
 displayTextScroll = 32
+currentlyPlaying = False
+displayText = ''
+displayTextWidth = 0
+durationMs = 1000
+progressMs = 0
+progressFetchMs = 0
 
-while time.time() - start_time < 50400:
+def spotifyDataFetcher():
 
-	try :
-		currentlyPlaying = Spotify.currentlyPlaying(accessToken)
+	global currentlyPlaying
+	global displayText
+	global displayTextWidth
+	global durationMs
+	global progressMs
+	global progressFetchMs
+
+	accessToken = ''
+	while time.time() - start_time < 50400:
+		try :
+			if accessToken == '':
+				accessToken = Spotify.getAccessToken()
 		
-		if currentlyPlaying['is_playing'] == True:
-		
-			songName = currentlyPlaying['item']['name'].encode('iso-8859-1').strip()
-			artistName = currentlyPlaying['item']['artists'][0]['name'].encode('iso-8859-1').strip()
-			displayText = artistName + ' - ' + songName
-			displayTextWidth = textWidth(displayText, fontSmall)
-			durationMs = currentlyPlaying['item']['duration_ms']
-			progressMs = currentlyPlaying['progress_ms']
-			remainingMs = durationMs - progressMs
-			loadMs = int(round(time.time() * 1000))
-			nowMs = loadMs
-			endMs = nowMs + remainingMs
+			currentlyPlayingData = Spotify.currentlyPlaying(accessToken)
 			
-			print displayText
-					
-			while endMs > nowMs and nowMs - loadMs < 5000:
+			if currentlyPlayingData['is_playing'] == True:
+				currentlyPlaying = True
+				songName = currentlyPlayingData['item']['name'].encode('iso-8859-1').strip()
+				artistName = currentlyPlayingData['item']['artists'][0]['name'].encode('iso-8859-1').strip()
+				displayText = artistName + ' - ' + songName
+				displayTextWidth = textWidth(displayText, fontSmall)
+				durationMs = currentlyPlayingData['item']['duration_ms']
+				progressMs = currentlyPlayingData['progress_ms']
+				progressFetchMs = int(round(time.time() * 1000))
+				print displayText
+				time.sleep(1)
+			else:
+				print 'not playing'
+				currentlyPlaying = False
+				time.sleep(10)
 			
-				draw.rectangle([(0, 0), image.size], fill = (0,0,0))
-			
-				currentProgressMs = progressMs + (nowMs - loadMs)
-				progress = currentProgressMs / float(durationMs) * 360
-				draw.pieslice([0, 0, 32, 32], 0, int(progress), fill=(60,0,0,255))
-				draw.arc([0, 0, 32, 32], 0, 360, fill=(120,0,0,255))
-				
-				draw.text((displayTextScroll, 3), displayText, fill=(170,170,170,170), font=fontSmall)
-				
-				currentProgressM = currentProgressMs / 60000
-				currentProgressS = (currentProgressMs / 1000) % 60
-				currentProgressStr = "%d:%02d" % (currentProgressM, currentProgressS)
-				
-				drawText(currentProgressStr, 0, 17, (170,170,170,170), fontSmall)
-				
-				matrix.SetImage(image.im.id, 0, 0)
-				displayTextScroll -= 1
-				
-				if displayTextScroll < -displayTextWidth:
-					displayTextScroll = 32
-				nowMs = int(round(time.time() * 1000))
-				time.sleep(0.05)
-			
-		else:
-			
-			print 'not playing'
-			
-			draw.rectangle([(0, 0), image.size], fill = (0,0,0))
-			matrix.SetImage(image.im.id, 0, 0)
-			time.sleep(20)
 
-	except Exception as e:
-		print e
-		time.sleep(20)
-		accessToken = Spotify.getAccessToken()	
+		except Exception as e:
+			logging.exception("Failed to fetch spotify data")
+			time.sleep(10)
+			accessToken = ''
+
+thread = threading.Thread(target=spotifyDataFetcher)
+thread.daemon = True
+thread.start()
+
+while thread.isAlive():
+	if currentlyPlaying:
+		nowMs = int(round(time.time() * 1000))
+		currentProgressMs = min(progressMs + nowMs - progressFetchMs, durationMs)
+		progress = currentProgressMs / float(durationMs) * 360
+		progressStr = "%d:%02d" % (currentProgressMs / 60000, (currentProgressMs / 1000) % 60)
+	
+		draw.rectangle([(0, 0), image.size], fill = (0,0,0))
+		draw.pieslice([0, 0, 32, 32], 0, int(progress), fill=(60,0,0,255))
+		draw.arc([0, 0, 32, 32], 0, 360, fill=(120,0,0,255))
+		draw.text((displayTextScroll, 3), displayText, fill=(170,170,170,170), font=fontSmall)
+		drawText(progressStr, 0, 17, (170,170,170,170), fontSmall)
+		
+		matrix.SetImage(image.im.id, 0, 0)
+
+		displayTextScroll -= 2
+		if displayTextScroll < -displayTextWidth:
+			displayTextScroll = 32
+		time.sleep(0.01)
+			
+	else:
+		draw.rectangle([(0, 0), image.size], fill = (0,0,0))
+		matrix.SetImage(image.im.id, 0, 0)
+		time.sleep(1)
+
 	
 
 
