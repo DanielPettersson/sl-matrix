@@ -74,7 +74,7 @@ while time.time() - start_time < 5400:
 
 
 	except Exception:
-		print ' Failed to get data from SL'
+		logging.exception("Failed to fetch SL data")
 		time.sleep(15)
 
 print 'Start checking for Spotify'		
@@ -95,6 +95,7 @@ def spotifyDataFetcher():
 	global durationMs
 	global progressMs
 	global progressFetchMs
+	global start_time
 
 	accessToken = ''
 	while time.time() - start_time < 50400:
