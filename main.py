@@ -119,7 +119,7 @@ def spotifyDataFetcher():
 			else:
 				print currentlyPlayingData
 				currentlyPlaying = False
-				if currentlyPlayingData['token_expired'] == True:
+				if currentlyPlayingData.get('token_expired', False) == True:
 					accessToken = ''
 				time.sleep(10)
 			
