@@ -21,7 +21,7 @@ class Spotify:
 		if response.status == 200 and responseData != '':
 			return json.loads(responseData, 'utf-8')
 		else:
-			return {'is_playing': False}
+			return {'is_playing': False, 'token_expired': response.status == 401}
 
 	@staticmethod
 	def getAccessToken():
