@@ -9,6 +9,7 @@ class SlData:
 	stationUrl = '/api2/typeahead.json?key=XXX&searchstring='
 	realtimeUrl = '/api2/realtimedeparturesV4.json?key=XXX&TimeWindow=60&siteid='
 
+
 	@staticmethod
 	def findStation(stationSearch):
 		
@@ -24,11 +25,11 @@ class SlData:
 		return stationData['ResponseData'][0]
 
 	@staticmethod
-	def nextBusFromStation(station, direction):
-		return SlData.nextBusFromSiteId(station['SiteId'], direction)
+	def nextBusesFromStation(station, direction):
+		return SlData.nextBusesFromSiteId(station['SiteId'], direction)
 
 	@staticmethod
-	def nextBusFromSiteId(siteId, direction):
+	def nextBusesFromSiteId(siteId, direction):
 
 		connection = httplib.HTTPConnection(SlData.host)
 		connection.request('GET', SlData.realtimeUrl + siteId)
@@ -36,11 +37,7 @@ class SlData:
 		realtimeData = json.loads(response.read(), 'utf-8')
 		connection.close()
 
-		for bus in realtimeData['ResponseData']['Buses']:
-			if bus['JourneyDirection'] == direction:
-				return bus
-
-		return None
+		return filter(lambda bus: bus['JourneyDirection'] == direction, realtimeData['ResponseData']['Buses'])
 
 
 

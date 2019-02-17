@@ -39,37 +39,43 @@ while time.time() - start_time < 5400:
 	print time.strftime('%Y-%m-%d %T')
 
 	try:
-		bus = SlData.nextBusFromSiteId('3277', 1)
+		buses = SlData.nextBusesFromSiteId('3277', 1)
 		
-		draw.rectangle([(0, 0), image.size], fill = (0,0,0))
-
-		if bus is None:
-			print 'No next bus'
-			drawText('Ingen', 0, 8, (255,255,0), fontSmall)
-		else:
-			print bus['LineNumber'] + ' ' + bus['DisplayTime'] 
-			drawText(bus['LineNumber'], -1, 0, (0,200,0), fontBig)
-			drawText(bus['DisplayTime'], 0, 17, (255,0,0), fontSmall)
-
-		matrix.Clear()
-		matrix.SetImage(image.im.id, 0, 0)
-
 		wait_time = 60
-		if bus is None:
-			wait_time = 120
-		elif bus['DisplayTime'] == '4 min' or bus['DisplayTime'] == '3 min'or bus['DisplayTime'] == '2 min':
+		if len(buses) == 0:
 			wait_time = 30
-		elif bus['DisplayTime'] == 'Nu' or bus['DisplayTime'] == '1 min':
+		elif buses[0]['DisplayTime'] == '4 min' or buses[0]['DisplayTime'] == '3 min'or buses[0]['DisplayTime'] == '2 min':
+			wait_time = 30
+		elif buses[0]['DisplayTime'] == 'Nu' or buses[0]['DisplayTime'] == '1 min':
 			wait_time = 15
 
 		wait_start_time = time.time()
 		waited_time = 0.01
+		bus_index = 0
+
 		while waited_time < wait_time:
+
+			draw.rectangle([(0, 0), image.size], fill = (0,0,0))
+
+			if len(buses) == 0:
+				drawText('Ingen', 0, 8, (255,255,0), fontSmall)
+			else:
+				drawText(buses[bus_index]['LineNumber'], -1, 0, (0,200,0), fontBig)
+				drawText(buses[bus_index]['DisplayTime'], 0, 17, (255,0,0), fontSmall)
+
+			if len(buses) < 2:
+				bus_index = 0
+			elif bus_index == 0:
+				bus_index = 1
+			else:
+				bus_inedx = 0
+
 			xx = waited_time/wait_time * 32
 			line.drawLine(draw, image, xx-2, 30, xx, 30, (210,210,210,20))
 			line.drawLine(draw, image, xx-2, 31, xx, 31, (210,210,210,20))
 			matrix.SetImage(image.im.id, 0, 0)
-			time.sleep(0.25)
+
+			time.sleep(2)
 			waited_time = time.time() - wait_start_time
 
 
