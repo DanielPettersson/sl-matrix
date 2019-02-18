@@ -68,7 +68,7 @@ while time.time() - start_time < 5400:
 			elif bus_index == 0:
 				bus_index = 1
 			else:
-				bus_inedx = 0
+				bus_index = 0
 
 			xx = waited_time/wait_time * 32
 			line.drawLine(draw, image, xx-2, 30, xx, 30, (210,210,210,20))
