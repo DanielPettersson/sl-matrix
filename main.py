@@ -11,7 +11,6 @@ import Image
 import ImageDraw
 import ImageFont
 import time
-import line
 import threading
 import logging
 from rgbmatrix import Adafruit_RGBmatrix
@@ -71,8 +70,7 @@ while time.time() - start_time < 5400:
 				bus_index = 0
 
 			xx = waited_time/wait_time * 32
-			line.drawLine(draw, image, xx-2, 30, xx, 30, (210,210,210,20))
-			line.drawLine(draw, image, xx-2, 31, xx, 31, (210,210,210,20))
+			draw.line([0, 29, xx, 29], fill=(150,150,150))
 			matrix.SetImage(image.im.id, 0, 0)
 
 			time.sleep(2)
